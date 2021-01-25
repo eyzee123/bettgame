@@ -11,6 +11,8 @@ include("z_db.php");
 date_default_timezone_set('Asia/Manila');
 $datedata = date("Y-m-d H:i:sa");
 
+session_start();
+
 function RandomString()
 
 {
@@ -40,7 +42,7 @@ if(@$_GET['action']=='login'){
       if(mysqli_num_rows($qre)!=0)
       {
             $res = mysqli_fetch_array($qre,MYSQLI_ASSOC);
-            session_start();
+            
             $_SESSION['MSRNO']=$res["Msrno"];
             $_SESSION['USERNAME']=$res["username"];
             $_SESSION['FNAME']=$res["name"];
@@ -108,11 +110,12 @@ if(@$_GET['action']=='login'){
 		else
 		{
 			$qre = mysqli_query($con,"select * from tempusermaster where uname='$username'");
-			echo $username;
-			if(mysqli_num_rows($qre)>0)
-			{
-				$status = "NOTOK";
-				$msg = "This Username already in use choose another Username";
+			if($qre){
+				if(mysqli_num_rows($qre)>0)
+				{
+					$status = "NOTOK";
+					$msg = "This Username already in use choose another Username";
+				}
 			}
 		}
 		if($pass=="")
@@ -170,7 +173,87 @@ if(@$_GET['action']=='login'){
 			// echo "<script>location.href = 'login.html';</script>";
 			echo "Success";
 		}
-}
+	}else if(@$_GET['action']=="home"){
+		$qre = mysqli_query($con,"select * from uwalletstatus where Msrno='".$_SESSION['MSRNO']."'");
+		if(mysqli_num_rows($qre)!=0)
+		{
+			$res = mysqli_fetch_array($qre,MYSQLI_ASSOC);
+			$balance = $res["cr"];
+		}	
+	
+		$qre = mysqli_query($con,"select * from fight_number_master order by id desc LIMIT 1");
+		$res = mysqli_fetch_array($qre,MYSQLI_ASSOC);
+		$fight_no = $res["fight_no"];
+
+	}else if(@$_GET['action']=="fight_no"){
+		$data = "";
+		for($j=1;$j<=300;$j++)
+		{
+			$i=1;
+			//and DATE_FORMAT(ondate,'%d-%m-%Y')=DATE_FORMAT('$datedata','%d-%m-%Y')
+			$qre = mysqli_query($con,"select * from fight_number_master where fight_status in (1,2,3,4)  and fight_no='$j'");
+			if(mysqli_num_rows($qre)>0)
+			{
+				while($res = mysqli_fetch_array($qre,MYSQLI_ASSOC))
+				{
+						$color = "";
+						$draw = "";
+						if($res["fight_status"]=="1")
+						{
+							$color = "#C81013";
+							$draw = "#fff";
+						}
+						else if($res["fight_status"]=="2")
+						{
+							$color = "#2122EC";
+							$draw = "#fff";
+						}
+						else if($res["fight_status"]=="3")
+						{
+							$color = "#FFFF00";
+							$draw = "#000";
+						}
+						else if($res["fight_status"]=="4")
+						{
+							$color = "#FF9900";
+							$draw = "#fff";
+						}
+						if($j>=1 && $j<=9)
+						{
+						//border-radius:100% !important;
+							$data .="<tr><td class='badge-holder text-center badge_number_automatic_1'>	
+								<span class='badge' style='background:".$color.";color:".$draw.";'>&nbsp;&nbsp;</span>	
+						</td></tr>";
+						}
+						else
+						{
+							$data .="<tr><td class='badge-holder text-center badge_number_automatic_1'>	
+								<span class='badge ' style='background:".$color.";color:".$draw.";'>&nbsp;&nbsp;</span>	
+						</td></tr>";
+						}
+						
+						
+				}	
+			}
+			else
+			{
+				$data .="<tr><td class='badge-holder text-center badge_number_automatic_1'>	
+								<span class='badge ' style='background:#292B2E;'>&nbsp;&nbsp;</span>	
+						</td></tr>";
+			}
+			if($j%5==0)
+			{
+				$data .="<td><table class='table table-bordered' cellpadding='0' cellpadding='0'></table></td>";
+			}
+	}//for end	
+		// echo $draw;
+		// echo $color;
+		echo $data;
+	}else if(@$_GET['action']=="welcome"){
+		$qre = mysqli_query($con,"select * from tempadmin");
+						$res = mysqli_fetch_array($qre,MYSQLI_ASSOC);
+						echo $res["dash_news"];
+	}
 
 
 ?>
