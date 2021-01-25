@@ -243,7 +243,7 @@ if(@$_GET['action']=='login'){
 			}
 			if($j%5==0)
 			{
-				$data .="<td><table class='table table-bordered' cellpadding='0' cellpadding='0'></table></td>";
+				// $data .="</table></td><td><table class='table table-bordered' cellpadding='0' cellpadding='0'>";
 			}
 	}//for end	
 		// echo $draw;
